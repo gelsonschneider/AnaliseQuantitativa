@@ -1,0 +1,440 @@
+---
+title: "Análise Quantitativa"
+output: 
+  flexdashboard::flex_dashboard:
+    theme:
+      version: 4
+      bg: "#101010"
+      fg: "#FDF7F7" 
+      primary: "#0000FF"
+      base_font:
+        google: Prompt
+      code_font:
+        google: JetBrains Mono
+    orientation: columns
+    vertical_layout: fill
+    source_code: embed
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(plotly)
+library(factoextra)
+
+dados <- read.csv('https://raw.githubusercontent.com/gelsonschneider/AnaliseQuantitativa/main/DadosConsolidados.csv', header = TRUE, sep = ";", quote = "\"", dec = ",")
+
+#View(dados)
+```
+
+# Mapas {data-icon="fa-globe"}
+
+## column {.sidebar}
+
+```{r}
+selectInput(
+  inputId = "mapa1",
+  label = "Selecione o primeiro Mapa:",
+  choices = c("Produção de Energia Renovável", "Consumo de Energia Renovável", "Consumo de Energia Fossil", "PIB", "População", "Acesso a Eletricidade", "Consumo de Energia Per Capita", "Renda Per Capita"), 
+  selected = "Produção de Energia Renovável"
+)
+
+sliderInput(
+  inputId = "ano1",
+  label = "Selecione o Ano:",
+  min = 1990, max = 2015, value = 2000, sep="")
+
+
+selectInput(
+  inputId = "mapa2",
+  label = "Selecione o primeiro Mapa:",
+  choices = c("Produção de Energia Renovável", "Consumo de Energia Renovável", "Consumo de Energia Fossil", "PIB", "População", "Acesso a Eletricidade", "Consumo de Energia Per Capita", "Renda Per Capita"), 
+  selected = "Consumo de Energia Renovável"
+)
+
+sliderInput(
+  inputId = "ano2",
+  label = "Selecione o Ano:",
+  min = 1990, max = 2015, value = 2000, sep="")
+
+```
+
+## Column
+
+### Primeiro Mapa
+
+```{r}
+# light grey boundaries (Configurações da borda)
+boundaries <- list(color = toRGB("grey"), width = 0.5)
+
+# specify map projection/options (Configurações da projeção do mapa)
+projection <- list(
+  showframe = FALSE,
+  showcoastlines = FALSE,
+  projection = list(type = 'Mercator')
+)
+ 
+renderPlotly({
+  if(input$mapa1=="Produção de Energia Renovável"){
+    mapaAtual<-"ProdEnergiaRen"
+    titulo = "Produção de Energia Renovável Por Ano"
+    tituloBarra = "% ano"
+    prefix = '%'
+    cor = "Greens"
+    
+  }else if(input$mapa1=="Consumo de Energia Renovável"){
+    mapaAtual<-"ConsEnergiaRe"
+    titulo = "Consumo de Energia Renovável"
+    tituloBarra = "% ano"
+    prefix = '%'
+    cor = "Greens"
+    
+  }else if(input$mapa1=="Consumo de Energia Fossil"){
+    mapaAtual<-"ConsEnergiaFossil"
+    titulo = "Consumo de Energia Fossil"
+    tituloBarra = "% ano"
+    prefix = '%'
+    cor = "Reds"
+    
+  }else if(input$mapa1=="PIB"){
+    mapaAtual<-"PIB"
+    titulo = 'Produto Interno Bruto - PIB'
+    tituloBarra = "$ ano"
+    prefix = '$'
+    cor = "Blues"
+    
+  }else if(input$mapa1=="População"){
+    mapaAtual<-"Populacao"
+    titulo = 'População'
+    tituloBarra = "ano"
+    prefix = ''
+    cor = "Oranges"
+    
+  }else if(input$mapa1=="Acesso a Eletricidade"){
+    mapaAtual<-"AcessoEletricidade"
+    titulo = 'Porcentagem de Acesso a Eletricidade'
+    tituloBarra = "% ano"
+    prefix = '%'
+    cor = "Blues"
+    
+  }else if(input$mapa1=="Consumo de Energia Per Capita"){
+    mapaAtual<-"ConsEnergiaPerCapta"
+    titulo = 'Consumo de Energia Per Capita'
+    tituloBarra = "$ ano"
+    prefix = '$'
+    cor = "Oranges"
+    
+    
+  }else if(input$mapa1=="Renda Per Capita"){
+    mapaAtual<-"RendaPerCapita"
+    titulo = 'Renda Per Capita'
+    tituloBarra = "$ ano"
+    prefix = '$'
+    cor = "Blues"
+  }
+  
+  plot_geo(dados) %>% 
+    add_trace(
+      z = unlist(dados %>% filter(Ano==input$ano1) %>% select(mapaAtual), use.names = FALSE), 
+      color = unlist(dados %>% filter(Ano==input$ano1) %>% select(mapaAtual), use.names = FALSE),
+      colors = cor,
+      text = unlist(dados %>% filter(Ano==input$ano1) %>% select(Pais),  use.names = FALSE),
+      locations = unlist(dados %>% filter(Ano==input$ano1) %>% select(Code),  use.names = FALSE),
+      marker = list(line = boundaries)) %>% 
+      colorbar(title = tituloBarra, tickprefix = prefix) %>% 
+      layout( title = titulo,
+      geo = projection)
+  })
+```
+
+### Segundo Mapa
+
+```{r}
+# light grey boundaries (Configurações da borda)
+boundaries <- list(color = toRGB("grey"), width = 0.5)
+
+# specify map projection/options (Configurações da projeção do mapa)
+projection <- list(
+  showframe = FALSE,
+  showcoastlines = FALSE,
+  projection = list(type = 'Mercator')
+)
+ 
+renderPlotly({
+  if(input$mapa2=="Produção de Energia Renovável"){
+    mapaAtual<-"ProdEnergiaRen"
+    titulo = "Produção de Energia Renovável Por Ano"
+    tituloBarra = "% ano"
+    prefix = '%'
+    cor = "Greens"
+    
+  }else if(input$mapa2=="Consumo de Energia Renovável"){
+    mapaAtual<-"ConsEnergiaRe"
+    titulo = "Consumo de Energia Renovável"
+    tituloBarra = "% ano"
+    prefix = '%'
+    cor = "Greens"
+    
+  }else if(input$mapa2=="Consumo de Energia Fossil"){
+    mapaAtual<-"ConsEnergiaFossil"
+    titulo = "Consumo de Energia Fossil"
+    tituloBarra = "% ano"
+    prefix = '%'
+    cor = "Reds"
+    
+  }else if(input$mapa2=="PIB"){
+    mapaAtual<-"PIB"
+    titulo = 'Produto Interno Bruto - PIB'
+    tituloBarra = "$ ano"
+    prefix = '$'
+    cor = "Blues"
+    
+  }else if(input$mapa2=="População"){
+    mapaAtual<-"Populacao"
+    titulo = 'População'
+    tituloBarra = "ano"
+    prefix = ''
+    cor = "Oranges"
+    
+  }else if(input$mapa2=="Acesso a Eletricidade"){
+    mapaAtual<-"AcessoEletricidade"
+    titulo = 'Porcentagem de Acesso a Eletricidade'
+    tituloBarra = "% ano"
+    prefix = '%'
+    cor = "Blues"
+    
+  }else if(input$mapa2=="Consumo de Energia Per Capita"){
+    mapaAtual<-"ConsEnergiaPerCapta"
+    titulo = 'Consumo de Energia Per Capita'
+    tituloBarra = "$ ano"
+    prefix = '$'
+    cor = "Oranges"
+    
+  }else if(input$mapa2=="Renda Per Capita"){
+    mapaAtual<-"RendaPerCapita"
+    titulo = 'Renda Per Capita'
+    tituloBarra = "$ ano"
+    prefix = '$'
+    cor = "Blues"
+  }
+  
+  plot_geo(dados) %>% 
+    add_trace(
+      z = unlist(dados %>% filter(Ano==input$ano2) %>% select(mapaAtual), use.names = FALSE), 
+      color = unlist(dados %>% filter(Ano==input$ano2) %>% select(mapaAtual), use.names = FALSE),
+      colors = cor,
+      text = unlist(dados %>% filter(Ano==input$ano2) %>% select(Pais),  use.names = FALSE),
+      locations = unlist(dados %>% filter(Ano==input$ano2) %>% select(Code),  use.names = FALSE),
+      marker = list(line = boundaries)) %>% 
+      colorbar(title = tituloBarra, tickprefix = prefix) %>% 
+      layout( title = titulo,
+      geo = projection)
+  })
+```
+
+# Produção de Energia Renovável X Consumo de Energia Renovável x Acesso a Eletricidade {data-icon="fa-bar-chart" data-navmenu="Graficos"}
+
+## column
+
+```{r}
+sliderInput(
+  inputId = "anoGrafico",
+  label = "Selecione o Ano:",
+  min = 1990, max = 2015, value = 2000, sep="")
+
+```
+
+### Gráfico: Produção de Energia Renovável X Consumo de Energia Renovável x Acesso a Eletricidade
+
+```{r}
+renderPlotly({
+  dadosGrafico <- dados %>% filter(Ano==input$anoGrafico, ProdEnergiaRen>0, ConsEnergiaRe>0, AcessoEletricidade>0)
+  
+  plot_ly(dadosGrafico, 
+  x = ~ProdEnergiaRen, y = ~ConsEnergiaRe,
+  color = ~Pais,
+  size = ~AcessoEletricidade, sizes = c(1, 200), text = ~AcessoEletricidade)  %>%
+  layout(title = "Produção de Energia Renovável X Consumo de Energia Renovável x Acesso a Eletricidade", xaxis = list(title = "% Produção de Energia Renovável"), 
+         yaxis = list(title = "% Consumo de Energia Renovável"))
+})
+
+```
+
+# Produção de Energia Renovável X Consumo de Energia Renovável X Renda Per Capita {data-icon="fa-bar-chart" data-navmenu="Graficos"}
+
+## Column
+
+```{r}
+sliderInput(
+  inputId = "anoGrafico2",
+  label = "Selecione o Ano:",
+  min = 1990, max = 2015, value = 2000, sep="")
+
+```
+
+### Gráfico: Produção de Energia Renovável X Consumo de Energia Renovável X Renda Per Capita
+
+```{r}
+
+renderPlotly({
+  dadosGrafico <- dados %>% filter(Ano==input$anoGrafico2, ProdEnergiaRen>0, ConsEnergiaRe>0, RendaPerCapita>0)
+  
+  plot_ly(dadosGrafico, 
+  x = ~ProdEnergiaRen, y = ~ConsEnergiaRe,
+  color = ~Pais,
+  size = ~RendaPerCapita, sizes = c(1, 400), text = ~RendaPerCapita)  %>%
+  layout(title = "Produção de Energia Renovável X Consumo de Energia Renovável x Renda Per Capita", xaxis = list(title = "% Produção de Energia Renovável"), 
+         yaxis = list(title = "% Consumo de Energia Renovável"))
+})
+
+```
+
+# Produção de Energia Renovável X Consumo de Energia Fossil {data-icon="fa-bar-chart" data-navmenu="Graficos"}
+
+## Column
+
+```{r}
+sliderInput(
+  inputId = "anoGrafico3",
+  label = "Selecione o Ano:",
+  min = 1990, max = 2015, value = 2000, sep="")
+
+```
+
+### Gráfico: Produção de Energia Renovável X Consumo de Energia Fossil
+
+```{r}
+
+renderPlotly({
+  dadosGrafico <- dados %>% filter(Ano==input$anoGrafico3, ProdEnergiaRen>0, ConsEnergiaRe>0, ConsEnergiaFossil>0)
+  
+  plot_ly(dadosGrafico, 
+  x = ~ProdEnergiaRen, y = ~ConsEnergiaFossil,
+  color = ~Pais)  %>%
+  layout(title = "Produção de Energia Renovável X Consumo de Energia Fossil", xaxis = list(title = "% Produção de Energia Renovável"), 
+         yaxis = list(title = "% Consumo de Energia Fossil"))
+})
+```
+
+# Consumo de Energia Fossil X Produção de CO2 X Renda Per Capita {data-icon="fa-bar-chart" data-navmenu="Graficos"}
+
+## Column
+
+```{r}
+sliderInput(
+  inputId = "anoGrafico4",
+  label = "Selecione o Ano:",
+  min = 1990, max = 2015, value = 2000, sep="")
+
+```
+
+### Gráfico: Consumo de Energia Fossil X Produção de CO2 X Renda Per Capita
+
+```{r}
+
+renderPlotly({
+  dadosGrafico <- dados %>% filter(Ano==input$anoGrafico4, ConsEnergiaFossil>0, ToneladaCo2>0, RendaPerCapita>0)
+  
+  plot_ly(dadosGrafico, 
+  x = ~ToneladaCo2, y = ~ConsEnergiaFossil,
+  color = ~Pais,
+  size = ~RendaPerCapita, sizes = c(1, 400), text = ~RendaPerCapita)  %>%
+  layout(title = "Consumo de Energia Fossil X Produção de CO2 X Renda Per Capita", xaxis = list(title = "Produção Tonelada de CO2"), 
+         yaxis = list(title = "% Consumo de Energia Fossil"))
+})
+```
+
+# Consumo de Energia Renovável X Produção de CO2 X Renda Per Capita {data-icon="fa-bar-chart" data-navmenu="Graficos"}
+
+## Column
+
+```{r}
+sliderInput(
+  inputId = "anoGrafico5",
+  label = "Selecione o Ano:",
+  min = 1990, max = 2015, value = 2000, sep="")
+
+```
+
+### Gráfico: Consumo de Energia Renovável X Produção de CO2 X Renda Per Capita
+
+```{r}
+
+renderPlotly({
+  dadosGrafico <- dados %>% filter(Ano==input$anoGrafico5, ConsEnergiaRe>0, ToneladaCo2>0, RendaPerCapita>0)
+  
+  plot_ly(dadosGrafico, 
+  x = ~ToneladaCo2, y = ~ConsEnergiaRe,
+  color = ~Pais,
+  size = ~RendaPerCapita, sizes = c(20, 400), text = ~RendaPerCapita)  %>%
+  layout(title = "Consumo de Energia Renovável X Produção de CO2 X Renda Per Capita", xaxis = list(title = "Produção Tonelada de CO2"), 
+         yaxis = list(title = "% Consumo de Energia Renovável"))
+})
+```
+
+# Tabelas {data-table="row" data-icon="fa-list"}
+
+## column
+
+```{r}
+sliderInput(
+  inputId = "anoDados",
+  label = "Selecione o Ano:",
+  min = 1990, max = 2015, value = 2000, sep="")
+
+```
+
+### Dados
+
+```{r}
+renderTable({
+  dados %>% filter(Ano==input$anoDados)
+})
+
+```
+
+# Agrupamentos (Clusters) {data-icon="fa-database"}
+
+## column
+
+```{r}
+sliderInput(
+  inputId = "anoCluster",
+  label = "Selecione o Ano:",
+  min = 1990, max = 2015, value = 2000, sep="")
+
+```
+
+### Clusters
+
+```{r}
+renderPlot({
+
+  df_2000 <- dados %>% filter (Ano==input$anoCluster) 
+
+  rownames(df_2000) <- df_2000$Pais
+  #View(df_2000)
+
+  df_2000 <- df_2000[,4:14]
+  #View(df_2000)
+
+  df <- scale(df_2000)
+  #View(df)
+
+  # Clusterização k-means
+  set.seed(123)
+  km.res = kmeans(df, 3, nstart=25, iter.max = 1000)
+
+  # Vizualizando os clusters
+
+  fviz_cluster(km.res, data=df,
+             palette = c("#2E9FDF", "#00AFBB", "#E7B800", "#FC4E07"),
+             ellipse.type="euclid",
+             star.plot=TRUE,
+             repel=TRUE,
+             ggtheme=theme_minimal())
+  })
+```
