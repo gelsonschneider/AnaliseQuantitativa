@@ -1,8 +1,8 @@
-# AnaliseQuantitativa
+# Analise Quantitativa
 
-Análise exploratória de dados e desenvolvimento de Dashboard em R com Flexdashboard + Shiny
+Análise exploratória de dados sobre uso de energia solar no mundo, bem como o desenvolvimento de Dashboard em R com Flexdashboard + Shiny
 
-# Pacotes requeridos no projeto
+# Pacotes R requeridos no projeto
 
 ### library(flexdashboard)
 ### library(dplyr)
